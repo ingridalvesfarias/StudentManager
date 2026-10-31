@@ -1,5 +1,4 @@
-import exception.MatriculaDuplicadaException;
-import model.Aluno;
+import model.Desempenho;
 import service.AlunoService;
 
 public class Main {
@@ -8,35 +7,43 @@ public class Main {
 
         service.cadastrar("Maria Silva", 20, "2024001", "Informática");
         service.cadastrar("João Souza", 19, "2024002", "Informática");
-        service.cadastrar("Mariana Costa", 21, "2024003", "Design");
+        service.cadastrar("Carlos Lima", 21, "2024003", "Design");
 
-        System.out.println("--- Listagem ---");
-        for (Aluno a : service.listarTodos()) {
-            System.out.println(a);
+        service.registrarNota("2024001", 8.5);
+        service.registrarNota("2024001", 7.0);
+        service.registrarNota("2024001", 6.0);
+
+        service.registrarNota("2024002", 4.0);
+
+        service.registrarNota("2024003", 5.0);
+        service.registrarNota("2024003", 6.0);
+
+        for (String matricula : new String[]{"2024001", "2024003"}) {
+            Desempenho d = service.consultarDesempenho(matricula);
+            System.out.printf("%s | Média: %.2f | %s%n",
+                    d.aluno().getNome(), d.media(), d.situacao().getDescricao());
         }
-
-        System.out.println("--- Busca por nome 'mari' ---");
-        for (Aluno a : service.buscarPorNome("mari")) {
-            System.out.println(a.getNome());
-        }
-
-        System.out.println("--- Busca por matrícula ---");
-        System.out.println(service.buscarPorMatricula("2024002"));
 
         try {
-            service.cadastrar("Outra Pessoa", 22, "2024001", "Design");
-        } catch (MatriculaDuplicadaException e) {
+            service.consultarDesempenho("2024002"); // só 1 nota
+        } catch (IllegalStateException e) {
             System.out.println("Erro esperado: " + e.getMessage());
         }
 
-        service.editar("2024002", "João P. Souza", 20, "Redes");
-        System.out.println(service.buscarPorMatricula("2024002"));
-
-        service.remover("2024003");
-        System.out.println("Total após remover: " + service.quantidade());
+        try {
+            service.registrarNota("2024001", 7.5); // 4ª nota
+        } catch (IllegalStateException e) {
+            System.out.println("Erro esperado: " + e.getMessage());
+        }
 
         try {
-            service.remover("9999");
+            service.registrarNota("2024003", -1);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Erro esperado: " + e.getMessage());
+        }
+
+        try {
+            service.registrarNota("9999", 8);
         } catch (IllegalArgumentException e) {
             System.out.println("Erro esperado: " + e.getMessage());
         }

@@ -10,6 +10,7 @@ import java.util.List;
 public class Aluno {
 
     public static final int MAX_NOTAS = 3;
+    public static final int MIN_NOTAS = 2; 
     public static final double NOTA_MINIMA = 0.0;
     public static final double NOTA_MAXIMA = 10.0;
 

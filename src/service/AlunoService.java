@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import model.Aluno;
+import model.Desempenho;
+import model.SituacaoAcademica;
+import util.CalculadoraMedia;
 
 /**
  * Regras de negócio e armazenamento dos alunos.
@@ -62,11 +65,26 @@ public class AlunoService {
         alunos.remove(aluno);
     }
 
+    public void registrarNota(String matricula, double nota) {
+        Aluno aluno = obterOuFalhar(matricula);
+        aluno.registrarNota(nota);
+    }
+
+    public Desempenho consultarDesempenho(String matricula) {
+        Aluno aluno = obterOuFalhar(matricula);
+        if (aluno.getNotas().size() < Aluno.MIN_NOTAS) {
+            throw new IllegalStateException(
+                "São necessárias pelo menos " + Aluno.MIN_NOTAS + " notas para calcular o desempenho.");
+        }
+        double media = CalculadoraMedia.calcularMedia(aluno.getNotas());
+        SituacaoAcademica situacao = CalculadoraMedia.definirSituacao(media);
+        return new Desempenho(aluno, media, situacao);
+    }
+
     public int quantidade() {
         return alunos.size();
     }
 
-    // Evita repetir "buscar e lançar erro se não achar"
     private Aluno obterOuFalhar(String matricula) {
         Aluno aluno = buscarPorMatricula(matricula);
         if (aluno == null) {
