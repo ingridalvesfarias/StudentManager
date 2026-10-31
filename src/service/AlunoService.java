@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import model.Aluno;
 import model.Desempenho;
+import model.RelatorioTurma;
 import model.SituacaoAcademica;
 import util.CalculadoraMedia;
 
@@ -81,10 +82,36 @@ public class AlunoService {
         return new Desempenho(aluno, media, situacao);
     }
 
+    public RelatorioTurma gerarRelatorio() {
+        int aprovados = 0;
+        int emRecuperacao = 0;
+        int reprovados = 0;
+        List<Double> medias = new ArrayList<>();
+
+        for (Aluno aluno : alunos) {
+            if (aluno.getNotas().size() < Aluno.MIN_NOTAS) {
+                continue; // ainda sem desempenho
+            }
+            Desempenho desempenho = consultarDesempenho(aluno.getMatricula());
+            medias.add(desempenho.media());
+
+            switch (desempenho.situacao()) {
+                case APROVADO -> aprovados++;
+                case RECUPERACAO -> emRecuperacao++;
+                case REPROVADO -> reprovados++;
+            }
+        }
+
+        double mediaGeral = medias.isEmpty() ? 0.0 : CalculadoraMedia.calcularMediaGeral(medias);
+        return new RelatorioTurma(alunos.size(), medias.size(),
+                aprovados, emRecuperacao, reprovados, mediaGeral);
+    }
+
     public int quantidade() {
         return alunos.size();
     }
 
+    // Evita repetir "buscar e lançar erro se não achar"
     private Aluno obterOuFalhar(String matricula) {
         Aluno aluno = buscarPorMatricula(matricula);
         if (aluno == null) {

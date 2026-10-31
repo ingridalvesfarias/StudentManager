@@ -26,6 +26,10 @@ public final class CalculadoraMedia {
         return soma / notas.size();
     }
 
+    public static double calcularMediaGeral(List<Double> medias) {
+        return calcularMedia(medias);
+    }
+
     public static SituacaoAcademica definirSituacao(double media) {
         if (media >= MEDIA_APROVACAO) {
             return SituacaoAcademica.APROVADO;
