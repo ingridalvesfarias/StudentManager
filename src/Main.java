@@ -1,28 +1,42 @@
+import exception.MatriculaDuplicadaException;
 import model.Aluno;
-import model.SituacaoAcademica;
-import util.CalculadoraMedia;
+import service.AlunoService;
 
 public class Main {
     public static void main(String[] args) {
-        Aluno aluno = new Aluno("Maria Silva", 20, "2024001", "Informática");
-        aluno.registrarNota(8.5);
-        aluno.registrarNota(7.0);
-        aluno.registrarNota(6.0);
+        AlunoService service = new AlunoService();
 
-        double media = CalculadoraMedia.calcularMedia(aluno.getNotas());
-        SituacaoAcademica situacao = CalculadoraMedia.definirSituacao(media);
-        System.out.printf("Média: %.2f | Situação: %s%n", media, situacao.getDescricao());
+        service.cadastrar("Maria Silva", 20, "2024001", "Informática");
+        service.cadastrar("João Souza", 19, "2024002", "Informática");
+        service.cadastrar("Mariana Costa", 21, "2024003", "Design");
 
-        // Testando os limites das regras
-        System.out.println("7.0 -> " + CalculadoraMedia.definirSituacao(7.0).getDescricao());
-        System.out.println("6.9 -> " + CalculadoraMedia.definirSituacao(6.9).getDescricao());
-        System.out.println("5.0 -> " + CalculadoraMedia.definirSituacao(5.0).getDescricao());
-        System.out.println("4.9 -> " + CalculadoraMedia.definirSituacao(4.9).getDescricao());
+        System.out.println("--- Listagem ---");
+        for (Aluno a : service.listarTodos()) {
+            System.out.println(a);
+        }
 
-        // Aluno sem notas
+        System.out.println("--- Busca por nome 'mari' ---");
+        for (Aluno a : service.buscarPorNome("mari")) {
+            System.out.println(a.getNome());
+        }
+
+        System.out.println("--- Busca por matrícula ---");
+        System.out.println(service.buscarPorMatricula("2024002"));
+
         try {
-            Aluno semNotas = new Aluno("João Souza", 19, "2024002", "Informática");
-            CalculadoraMedia.calcularMedia(semNotas.getNotas());
+            service.cadastrar("Outra Pessoa", 22, "2024001", "Design");
+        } catch (MatriculaDuplicadaException e) {
+            System.out.println("Erro esperado: " + e.getMessage());
+        }
+
+        service.editar("2024002", "João P. Souza", 20, "Redes");
+        System.out.println(service.buscarPorMatricula("2024002"));
+
+        service.remover("2024003");
+        System.out.println("Total após remover: " + service.quantidade());
+
+        try {
+            service.remover("9999");
         } catch (IllegalArgumentException e) {
             System.out.println("Erro esperado: " + e.getMessage());
         }
